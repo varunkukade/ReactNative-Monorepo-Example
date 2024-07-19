@@ -1,4 +1,22 @@
 {
   "name": "yarn-workspace-example",
-  "packageManager": "yarn@4.3.1"
+  "packageManager": "yarn@4.3.1",
+  "workspaces": [
+    "apps/*",
+    "common/*"
+  ],
+  "scripts": {
+    "animatedList:run-android": "yarn workspace AnimatedList run android",
+    "animatedList:run-ios": "yarn workspace AnimatedList run ios",
+    "animatedList:test": "yarn workspace AnimatedList test",
+    "animatedList:start": "yarn workspace AnimatedList start --reset-cache",
+    "animatedList:install-dependencies": "yarn workspace AnimatedList install",
+    "animatedList:install-pods": "yarn workspace AnimatedList install-pods",
+    "animatedSwipableItem:run-android": "yarn workspace AnimatedSwipableItem run android",
+    "animatedSwipableItem:run-ios": "yarn workspace AnimatedSwipableItem run ios",
+    "animatedSwipableItem:test": "yarn workspace AnimatedSwipableItem test",
+    "animatedSwipableItem:start": "yarn workspace AnimatedSwipableItem start --reset-cache",
+    "animatedSwipableItem:install-dependencies": "yarn workspace AnimatedSwipableItem install",
+    "animatedSwipableItem:install-pods": "yarn workspace AnimatedSwipableItem install-pods"
+  }
 }
