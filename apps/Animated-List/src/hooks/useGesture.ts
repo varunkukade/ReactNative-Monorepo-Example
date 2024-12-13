@@ -208,11 +208,13 @@ export const useGesture = (
             [Color_Pallete.metal_black, Color_Pallete.crystal_white],
           )
         : undefined,
-      shadowOffset: {
-        width: 0,
-        height: isCurrentDraggingItem.value
-          ? interpolate(isDraggingDerived.value, [0, 1], [0, 7])
-          : 0,
+      style: {
+        shadowOffset: {
+          width: 0,
+          height: isCurrentDraggingItem.value
+            ? interpolate(isDraggingDerived.value, [0, 1], [0, 7])
+            : 0,
+        },
       },
       shadowOpacity: isCurrentDraggingItem.value
         ? interpolate(isDraggingDerived.value, [0, 1], [0, 0.2])
