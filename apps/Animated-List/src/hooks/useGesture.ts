@@ -2,6 +2,7 @@ import {
   SharedValue,
   interpolate,
   interpolateColor,
+  runOnJS,
   useAnimatedReaction,
   useAnimatedStyle,
   useDerivedValue,
@@ -12,8 +13,10 @@ import {
 } from 'react-native-reanimated';
 import {
   Color_Pallete,
+  EDGE_THRESHOLD,
   MAX_BOUNDRY,
   MIN_BOUNDRY,
+  SCREEN_HEIGHT,
   SONG_HEIGHT,
 } from '../constants';
 import {NullableNumber, TSongPositions, TItem} from '../types';
@@ -24,6 +27,9 @@ export const useGesture = (
   isDragging: SharedValue<number>,
   draggedItemId: SharedValue<NullableNumber>,
   currentSongPositions: SharedValue<TSongPositions>,
+  scrollUp: () => void,
+  scrollDown: () => void,
+  scrollY: SharedValue<number>,
 ) => {
   //used for swapping with currentIndex
   const newIndex = useSharedValue<NullableNumber>(null);
@@ -44,6 +50,127 @@ export const useGesture = (
   const draggedItemIdDerived = useDerivedValue(() => {
     return draggedItemId.value;
   });
+
+  const scrollYDerived = useDerivedValue(() => {
+    return scrollY.value;
+  });
+
+  const isCurrentDraggingItem = useDerivedValue(() => {
+    return isDraggingDerived.value && draggedItemIdDerived.value === item.id;
+  });
+
+  const getKeyOfValue = (
+    value: number,
+    obj: TSongPositions,
+  ): number | undefined => {
+    'worklet';
+    for (const [key, val] of Object.entries(obj)) {
+      if (val.updatedIndex === value) {
+        return Number(key);
+      }
+    }
+    return undefined; // Return undefined if the value is not found
+  };
+
+  const onGestureUpdate = (newTop: number) => {
+    'worklet';
+
+    let localNewTop;
+    let topEdge = scrollYDerived.value + EDGE_THRESHOLD;
+    let bottomEdge = scrollYDerived.value + SCREEN_HEIGHT - EDGE_THRESHOLD * 2;
+    const isUpperEdge = newTop <= topEdge;
+    const isBottomEdge = newTop >= bottomEdge;
+
+    if (
+      currentIndex.value === null ||
+      newTop < MIN_BOUNDRY ||
+      newTop > MAX_BOUNDRY
+      // isUpperEdge
+      // isBottomEdge
+    ) {
+      //dragging out of bound
+
+      // else if (isBottomEdge) {
+      //   // top.value = scrollYDerived.value + SCREEN_HEIGHT - EDGE_THRESHOLD * 2;
+      //   runOnJS(scrollDown)();
+      // }
+      return;
+    }
+
+    if (isUpperEdge) {
+      top.value = topEdge;
+      localNewTop = topEdge;
+    } else if (isBottomEdge) {
+      top.value = bottomEdge;
+      localNewTop = bottomEdge;
+    } else {
+      top.value = newTop;
+      localNewTop = newTop;
+    }
+
+    //calculate the new index where drag is headed to
+    newIndex.value = Math.floor((localNewTop + SONG_HEIGHT / 2) / SONG_HEIGHT);
+
+    //swap the items present at newIndex and currentIndex
+    if (newIndex.value !== currentIndex.value) {
+      //find id of the item that currently resides at newIndex
+      const newIndexItemKey = getKeyOfValue(
+        newIndex.value,
+        currentSongPositionsDerived.value,
+      );
+
+      //find id of the item that currently resides at currentIndex
+      const currentDragIndexItemKey = getKeyOfValue(
+        currentIndex.value,
+        currentSongPositionsDerived.value,
+      );
+
+      if (
+        newIndexItemKey !== undefined &&
+        currentDragIndexItemKey !== undefined
+      ) {
+        //we update updatedTop and updatedIndex as next time we want to do calculations from new top value and new index
+        currentSongPositions.value = {
+          ...currentSongPositionsDerived.value,
+          [newIndexItemKey]: {
+            ...currentSongPositionsDerived.value[newIndexItemKey],
+            updatedIndex: currentIndex.value,
+            updatedTop: currentIndex.value * SONG_HEIGHT,
+          },
+          [currentDragIndexItemKey]: {
+            ...currentSongPositionsDerived.value[currentDragIndexItemKey],
+            updatedIndex: newIndex.value,
+          },
+        };
+
+        //update new index as current index
+        currentIndex.value = newIndex.value;
+      }
+    }
+
+    if (isUpperEdge) {
+      runOnJS(scrollUp)();
+    } else if (isBottomEdge) {
+      runOnJS(scrollDown)();
+    }
+  };
+
+  useAnimatedReaction(
+    () => {
+      return scrollYDerived.value;
+    },
+    (currentValue, previousValue) => {
+      if (!isDraggingDerived.value || draggedItemIdDerived.value === null) {
+        return;
+      }
+      const isScrolledUp = (previousValue || 0) > currentValue;
+      onGestureUpdate(
+        isScrolledUp
+          ? top.value - Math.abs(currentValue - (previousValue || 0))
+          : top.value + Math.abs(currentValue - (previousValue || 0)),
+      );
+    },
+  );
 
   useAnimatedReaction(
     () => {
@@ -70,23 +197,6 @@ export const useGesture = (
     },
   );
 
-  const isCurrentDraggingItem = useDerivedValue(() => {
-    return isDraggingDerived.value && draggedItemIdDerived.value === item.id;
-  });
-
-  const getKeyOfValue = (
-    value: number,
-    obj: TSongPositions,
-  ): number | undefined => {
-    'worklet';
-    for (const [key, val] of Object.entries(obj)) {
-      if (val.updatedIndex === value) {
-        return Number(key);
-      }
-    }
-    return undefined; // Return undefined if the value is not found
-  };
-
   const gesture = Gesture.Pan()
     .onStart(() => {
       //start dragging
@@ -103,60 +213,10 @@ export const useGesture = (
       if (draggedItemIdDerived.value === null) {
         return;
       }
-
-      const newTop =
+      onGestureUpdate(
         currentSongPositionsDerived.value[draggedItemIdDerived.value]
-          .updatedTop + e.translationY;
-
-      if (
-        currentIndex.value === null ||
-        newTop < MIN_BOUNDRY ||
-        newTop > MAX_BOUNDRY
-      ) {
-        //dragging out of bound
-        return;
-      }
-      top.value = newTop;
-
-      //calculate the new index where drag is headed to
-      newIndex.value = Math.floor((newTop + SONG_HEIGHT / 2) / SONG_HEIGHT);
-
-      //swap the items present at newIndex and currentIndex
-      if (newIndex.value !== currentIndex.value) {
-        //find id of the item that currently resides at newIndex
-        const newIndexItemKey = getKeyOfValue(
-          newIndex.value,
-          currentSongPositionsDerived.value,
-        );
-
-        //find id of the item that currently resides at currentIndex
-        const currentDragIndexItemKey = getKeyOfValue(
-          currentIndex.value,
-          currentSongPositionsDerived.value,
-        );
-
-        if (
-          newIndexItemKey !== undefined &&
-          currentDragIndexItemKey !== undefined
-        ) {
-          //we update updatedTop and updatedIndex as next time we want to do calculations from new top value and new index
-          currentSongPositions.value = {
-            ...currentSongPositionsDerived.value,
-            [newIndexItemKey]: {
-              ...currentSongPositionsDerived.value[newIndexItemKey],
-              updatedIndex: currentIndex.value,
-              updatedTop: currentIndex.value * SONG_HEIGHT,
-            },
-            [currentDragIndexItemKey]: {
-              ...currentSongPositionsDerived.value[currentDragIndexItemKey],
-              updatedIndex: newIndex.value,
-            },
-          };
-
-          //update new index as current index
-          currentIndex.value = newIndex.value;
-        }
-      }
+          .updatedTop + e.translationY,
+      );
     })
     .onEnd(() => {
       if (currentIndex.value === null || newIndex.value === null) {

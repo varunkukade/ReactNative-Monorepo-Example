@@ -12,12 +12,18 @@ export const ListItem = ({
   isDragging,
   draggedItemId,
   currentSongPositions,
+  scrollUp,
+  scrollDown,
+  scrollY,
 }: TListItem) => {
   const {animatedStyles, gesture} = useGesture(
     item,
     isDragging,
     draggedItemId,
     currentSongPositions,
+    scrollUp,
+    scrollDown,
+    scrollY,
   );
 
   return (

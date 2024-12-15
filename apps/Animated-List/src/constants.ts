@@ -1,3 +1,4 @@
+import {Dimensions} from 'react-native';
 import {TSongPositions} from './types';
 
 export const SONG_HEIGHT = 80;
@@ -137,3 +138,6 @@ export const ANIMATION_DURATION = 600;
 
 export const MIN_BOUNDRY = 0;
 export const MAX_BOUNDRY = (SONGS.length - 1) * SONG_HEIGHT;
+export const SCREEN_HEIGHT = Dimensions.get('window').height;
+export const EDGE_THRESHOLD = 40;
+export const SCROLL_SPEED_OFFSET = 40;

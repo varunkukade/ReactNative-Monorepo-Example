@@ -1,6 +1,6 @@
-import { Dimensions } from 'react-native';
-import { TItem } from './types';
-import { getRandomColor } from './helpers';
+import {Dimensions} from 'react-native';
+import {TItem} from './types';
+import {getRandomColor} from './helpers';
 
 export const SONG_HEIGHT = 80;
 export enum EAnimationType {

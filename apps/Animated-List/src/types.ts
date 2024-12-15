@@ -12,6 +12,9 @@ export type TListItem = {
   isDragging: SharedValue<number>;
   draggedItemId: SharedValue<NullableNumber>;
   currentSongPositions: SharedValue<TSongPositions>;
+  scrollUp: () => void;
+  scrollDown: () => void;
+  scrollY: SharedValue<number>;
 };
 
 export type TSongPositions = {

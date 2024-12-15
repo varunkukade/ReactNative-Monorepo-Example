@@ -1,18 +1,22 @@
-import React from 'react';
-import {ScrollView, View} from 'react-native';
+import React, {useRef} from 'react';
+import {View} from 'react-native';
 
-import {useSharedValue} from 'react-native-reanimated';
+import Animated, {
+  useAnimatedScrollHandler,
+  useSharedValue,
+} from 'react-native-reanimated';
 import {ListItem} from '../components/ListItem';
-import {getInitialPositions, SONGS, SONG_HEIGHT} from '../constants';
+import {
+  getInitialPositions,
+  SONGS,
+  SONG_HEIGHT,
+  SCROLL_SPEED_OFFSET,
+} from '../constants';
 import {styles} from './AnimatedList.styles';
 import {NullableNumber, TSongPositions} from '../types';
 
 export const AnimatedList = () => {
-  /*
-  TODO: Feature to add - Dragging item to bottom and up should scroll the list automatically
-  Item reaches bottommost section - scroll down the list max upto SONGS.length * SONG_HEIGHT
-  Item reaches uppermost section - scroll up to the way to 0
-  */
+  const scrollviewRef = useRef<any>(null);
 
   //will hold the songs position in list at every moment
   const currentSongPositions = useSharedValue<TSongPositions>(
@@ -25,6 +29,7 @@ export const AnimatedList = () => {
   //this will hold id for item which user started dragging
   const draggedItemId = useSharedValue<NullableNumber>(null);
 
+  const scrollY = useSharedValue(0);
   // const renderCell = useCallback(
   //   ({index, style, ...props}: any) => {
   //     console.log('In renderCell', index);
@@ -37,9 +42,30 @@ export const AnimatedList = () => {
   //   [currentDragIndex],
   // );
 
+  const scrollUp = () => {
+    scrollviewRef.current?.scrollTo({
+      y: Math.max(0, scrollY.value - SCROLL_SPEED_OFFSET),
+      animated: true,
+    });
+  };
+
+  const scrollDown = () => {
+    scrollviewRef.current?.scrollTo({
+      y: scrollY.value + SCROLL_SPEED_OFFSET,
+      animated: true,
+    });
+  };
+
+  const scrollHandler = useAnimatedScrollHandler(event => {
+    scrollY.value = event.contentOffset.y;
+  });
+
   return (
     <View style={styles.listContainer}>
-      <ScrollView contentContainerStyle={{height: SONGS.length * SONG_HEIGHT}}>
+      <Animated.ScrollView
+        ref={scrollviewRef}
+        onScroll={scrollHandler}
+        contentContainerStyle={{height: SONGS.length * SONG_HEIGHT}}>
         {SONGS.map(eachSong => (
           <ListItem
             item={eachSong}
@@ -47,9 +73,12 @@ export const AnimatedList = () => {
             isDragging={isDragging}
             draggedItemId={draggedItemId}
             currentSongPositions={currentSongPositions}
+            scrollUp={scrollUp}
+            scrollDown={scrollDown}
+            scrollY={scrollY}
           />
         ))}
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 };
