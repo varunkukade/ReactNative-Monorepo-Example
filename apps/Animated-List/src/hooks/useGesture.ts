@@ -56,7 +56,7 @@ export const useGesture = (
   });
 
   const isCurrentDraggingItem = useDerivedValue(() => {
-    return isDraggingDerived.value && draggedItemIdDerived.value === item.id;
+    return draggedItemIdDerived.value === item.id;
   });
 
   const getKeyOfValue = (
@@ -110,7 +110,6 @@ export const useGesture = (
 
     //calculate the new index where drag is headed to
     newIndex.value = Math.floor((localNewTop + SONG_HEIGHT / 2) / SONG_HEIGHT);
-
     //swap the items present at newIndex and currentIndex
     if (newIndex.value !== currentIndex.value) {
       //find id of the item that currently resides at newIndex
@@ -160,7 +159,12 @@ export const useGesture = (
       return scrollYDerived.value;
     },
     (currentValue, previousValue) => {
-      if (!isDraggingDerived.value || draggedItemIdDerived.value === null) {
+      if (
+        isDraggingDerived.value !== 1 ||
+        draggedItemIdDerived.value === null
+      ) {
+        //we don't want to trigger automatic scroll when user ends the drag
+        //we used condition isDraggingDerived.value !== 1 because value goes to 0 slowly because of withSpring animation
         return;
       }
       const isScrolledUp = (previousValue || 0) > currentValue;
@@ -239,7 +243,7 @@ export const useGesture = (
           },
         };
       }
-      //stop dragging
+      //stop dragging with delay of 200ms to have nice animation consistent with scale
       isDragging.value = withDelay(200, withSpring(0));
     });
 
