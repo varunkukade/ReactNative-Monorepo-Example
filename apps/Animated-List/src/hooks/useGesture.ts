@@ -30,6 +30,7 @@ export const useGesture = (
   scrollUp: () => void,
   scrollDown: () => void,
   scrollY: SharedValue<number>,
+  isDragInProgress: SharedValue<boolean>,
 ) => {
   //used for swapping with currentIndex
   const newIndex = useSharedValue<NullableNumber>(null);
@@ -51,12 +52,19 @@ export const useGesture = (
     return draggedItemId.value;
   });
 
+  const isDragInProgressDerived = useDerivedValue(() => {
+    return isDragInProgress.value;
+  });
+
   const scrollYDerived = useDerivedValue(() => {
     return scrollY.value;
   });
 
   const isCurrentDraggingItem = useDerivedValue(() => {
-    return draggedItemIdDerived.value === item.id;
+    return (
+      draggedItemIdDerived.value !== null &&
+      draggedItemIdDerived.value === item.id
+    );
   });
 
   const getKeyOfValue = (
@@ -76,8 +84,9 @@ export const useGesture = (
     'worklet';
 
     let localNewTop;
-    let topEdge = scrollYDerived.value + EDGE_THRESHOLD;
-    let bottomEdge = scrollYDerived.value + SCREEN_HEIGHT - EDGE_THRESHOLD * 2;
+    let topEdge = scrollYDerived.value;
+    let bottomEdge =
+      scrollYDerived.value + SCREEN_HEIGHT - EDGE_THRESHOLD * 2.5;
     const isUpperEdge = newTop <= topEdge;
     const isBottomEdge = newTop >= bottomEdge;
 
@@ -134,7 +143,6 @@ export const useGesture = (
           [newIndexItemKey]: {
             ...currentSongPositionsDerived.value[newIndexItemKey],
             updatedIndex: currentIndex.value,
-            updatedTop: currentIndex.value * SONG_HEIGHT,
           },
           [currentDragIndexItemKey]: {
             ...currentSongPositionsDerived.value[currentDragIndexItemKey],
@@ -159,12 +167,8 @@ export const useGesture = (
       return scrollYDerived.value;
     },
     (currentValue, previousValue) => {
-      if (
-        isDraggingDerived.value !== 1 ||
-        draggedItemIdDerived.value === null
-      ) {
+      if (!isDragInProgressDerived.value) {
         //we don't want to trigger automatic scroll when user ends the drag
-        //we used condition isDraggingDerived.value !== 1 because value goes to 0 slowly because of withSpring animation
         return;
       }
       const isScrolledUp = (previousValue || 0) > currentValue;
@@ -182,10 +186,8 @@ export const useGesture = (
     },
     (currentValue, previousValue) => {
       if (currentValue !== previousValue) {
-        if (
-          draggedItemIdDerived.value !== null &&
-          item.id === draggedItemIdDerived.value
-        ) {
+        if (isCurrentDraggingItem) {
+          //add separate animation for dragging item
           top.value = withSpring(
             currentSongPositionsDerived.value[item.id].updatedIndex *
               SONG_HEIGHT,
@@ -209,6 +211,9 @@ export const useGesture = (
       //keep track of dragged item
       draggedItemId.value = item.id;
 
+      //start dragging
+      isDragInProgress.value = true;
+
       //store dragged item id for future swap
       currentIndex.value =
         currentSongPositionsDerived.value[item.id].updatedIndex;
@@ -217,32 +222,16 @@ export const useGesture = (
       if (draggedItemIdDerived.value === null) {
         return;
       }
-      onGestureUpdate(
-        currentSongPositionsDerived.value[draggedItemIdDerived.value]
-          .updatedTop + e.translationY,
-      );
+      onGestureUpdate(scrollYDerived.value + e.absoluteY);
     })
     .onEnd(() => {
+      isDragInProgress.value = false;
+
       if (currentIndex.value === null || newIndex.value === null) {
         return;
       }
       top.value = withSpring(newIndex.value * SONG_HEIGHT);
       //find original id of the item that currently resides at currentIndex
-      const currentDragIndexItemKey = getKeyOfValue(
-        currentIndex.value,
-        currentSongPositionsDerived.value,
-      );
-
-      if (currentDragIndexItemKey !== undefined) {
-        //update the values for item whose drag we just stopped
-        currentSongPositions.value = {
-          ...currentSongPositionsDerived.value,
-          [currentDragIndexItemKey]: {
-            ...currentSongPositionsDerived.value[currentDragIndexItemKey],
-            updatedTop: newIndex.value * SONG_HEIGHT,
-          },
-        };
-      }
       //stop dragging with delay of 200ms to have nice animation consistent with scale
       isDragging.value = withDelay(200, withSpring(0));
     });

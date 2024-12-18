@@ -23,11 +23,14 @@ export const AnimatedList = () => {
     getInitialPositions(),
   );
 
-  //used to know if drag is happening or not
+  //used to control the animation visual using interpolation
   const isDragging = useSharedValue<0 | 1>(0);
 
   //this will hold id for item which user started dragging
   const draggedItemId = useSharedValue<NullableNumber>(null);
+
+  //used to stop the automatic scroll once drag is ended by user.
+  const isDragInProgress = useSharedValue(false);
 
   const scrollY = useSharedValue(0);
   // const renderCell = useCallback(
@@ -76,6 +79,7 @@ export const AnimatedList = () => {
             scrollUp={scrollUp}
             scrollDown={scrollDown}
             scrollY={scrollY}
+            isDragInProgress={isDragInProgress}
           />
         ))}
       </Animated.ScrollView>

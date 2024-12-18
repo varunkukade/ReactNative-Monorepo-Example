@@ -15,12 +15,12 @@ export type TListItem = {
   scrollUp: () => void;
   scrollDown: () => void;
   scrollY: SharedValue<number>;
+  isDragInProgress: SharedValue<boolean>;
 };
 
 export type TSongPositions = {
   [key: number]: {
     updatedIndex: number;
-    updatedTop: number;
   };
 };
 

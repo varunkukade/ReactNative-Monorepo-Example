@@ -15,6 +15,7 @@ export const ListItem = ({
   scrollUp,
   scrollDown,
   scrollY,
+  isDragInProgress,
 }: TListItem) => {
   const {animatedStyles, gesture} = useGesture(
     item,
@@ -24,6 +25,7 @@ export const ListItem = ({
     scrollUp,
     scrollDown,
     scrollY,
+    isDragInProgress,
   );
 
   return (
