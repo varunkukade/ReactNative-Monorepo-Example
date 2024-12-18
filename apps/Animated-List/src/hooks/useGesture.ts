@@ -219,19 +219,14 @@ export const useGesture = (
         currentSongPositionsDerived.value[item.id].updatedIndex;
     })
     .onUpdate(e => {
-      if (draggedItemIdDerived.value === null) {
-        return;
-      }
       onGestureUpdate(scrollYDerived.value + e.absoluteY);
     })
     .onEnd(() => {
       isDragInProgress.value = false;
-
-      if (currentIndex.value === null || newIndex.value === null) {
+      if (newIndex.value === null) {
         return;
       }
       top.value = withSpring(newIndex.value * SONG_HEIGHT);
-      //find original id of the item that currently resides at currentIndex
       //stop dragging with delay of 200ms to have nice animation consistent with scale
       isDragging.value = withDelay(200, withSpring(0));
     });
@@ -280,7 +275,7 @@ export const useGesture = (
         : 0, // For Android,
       zIndex: isCurrentDraggingItem.value ? 1 : 0,
     };
-  }, [draggedItemIdDerived.value, isDraggingDerived.value]);
+  }, [isCurrentDraggingItem.value, isDraggingDerived.value]);
 
   return {
     animatedStyles,
