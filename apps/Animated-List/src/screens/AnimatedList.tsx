@@ -1,7 +1,9 @@
-import React, {useRef} from 'react';
+import React from 'react';
 import {View} from 'react-native';
 
 import Animated, {
+  scrollTo,
+  useAnimatedRef,
   useAnimatedScrollHandler,
   useSharedValue,
 } from 'react-native-reanimated';
@@ -16,7 +18,7 @@ import {styles} from './AnimatedList.styles';
 import {NullableNumber, TSongPositions} from '../types';
 
 export const AnimatedList = () => {
-  const scrollviewRef = useRef<any>(null);
+  const scrollviewRef = useAnimatedRef();
 
   //will hold the songs position in list at every moment
   const currentSongPositions = useSharedValue<TSongPositions>(
@@ -46,17 +48,17 @@ export const AnimatedList = () => {
   // );
 
   const scrollUp = () => {
-    scrollviewRef.current?.scrollTo({
-      y: Math.max(0, scrollY.value - SCROLL_SPEED_OFFSET),
-      animated: true,
-    });
+    'worklet';
+    const newY =
+      scrollY.value - SCROLL_SPEED_OFFSET < 0
+        ? 0
+        : scrollY.value - SCROLL_SPEED_OFFSET;
+    scrollTo(scrollviewRef, 0, newY, true);
   };
 
   const scrollDown = () => {
-    scrollviewRef.current?.scrollTo({
-      y: scrollY.value + SCROLL_SPEED_OFFSET,
-      animated: true,
-    });
+    'worklet';
+    scrollTo(scrollviewRef, 0, scrollY.value + SCROLL_SPEED_OFFSET, true);
   };
 
   const scrollHandler = useAnimatedScrollHandler(event => {

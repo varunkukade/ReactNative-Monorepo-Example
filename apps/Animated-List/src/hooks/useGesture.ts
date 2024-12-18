@@ -94,15 +94,7 @@ export const useGesture = (
       currentIndex.value === null ||
       newTop < MIN_BOUNDRY ||
       newTop > MAX_BOUNDRY
-      // isUpperEdge
-      // isBottomEdge
     ) {
-      //dragging out of bound
-
-      // else if (isBottomEdge) {
-      //   // top.value = scrollYDerived.value + SCREEN_HEIGHT - EDGE_THRESHOLD * 2;
-      //   runOnJS(scrollDown)();
-      // }
       return;
     }
 
@@ -156,9 +148,9 @@ export const useGesture = (
     }
 
     if (isUpperEdge) {
-      runOnJS(scrollUp)();
+      scrollUp();
     } else if (isBottomEdge) {
-      runOnJS(scrollDown)();
+      scrollDown();
     }
   };
 
