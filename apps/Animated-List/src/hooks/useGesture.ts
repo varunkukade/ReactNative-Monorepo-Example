@@ -2,7 +2,6 @@ import {
   SharedValue,
   interpolate,
   interpolateColor,
-  runOnJS,
   useAnimatedReaction,
   useAnimatedStyle,
   useDerivedValue,
@@ -175,6 +174,7 @@ export const useGesture = (
       return currentSongPositionsDerived.value[item.id].updatedIndex;
     },
     (currentValue, previousValue) => {
+      //useAnimatedReaction executed when any of the item's updatedIndex changes
       if (currentValue !== previousValue) {
         if (!isCurrentDraggingItem.value) {
           top.value = withTiming(
