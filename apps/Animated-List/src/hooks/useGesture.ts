@@ -93,7 +93,6 @@ export const useGesture = (
       newTop <= MIN_BOUNDRY ||
       newTop >= MAX_BOUNDRY
     ) {
-      //TODO: see why this is console printing when item dragged to bottom
       return;
     }
 
