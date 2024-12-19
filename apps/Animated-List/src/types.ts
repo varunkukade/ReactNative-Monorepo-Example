@@ -21,6 +21,7 @@ export type TListItem = {
 export type TSongPositions = {
   [key: number]: {
     updatedIndex: number;
+    updatedTop: number;
   };
 };
 

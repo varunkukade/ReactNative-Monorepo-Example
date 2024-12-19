@@ -121,6 +121,7 @@ export const getInitialPositions = (): TSongPositions => {
   for (let i = 0; i < SONGS.length; i++) {
     songPositions[i] = {
       updatedIndex: i,
+      updatedTop: i * SONG_HEIGHT,
     };
   }
   return songPositions;

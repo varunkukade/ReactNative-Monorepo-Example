@@ -63,6 +63,8 @@ export const useGesture = (
     return draggedItemIdDerived.value === item.id;
   });
 
+  const totalY = useSharedValue(0);
+
   const getKeyOfValue = (
     value: number,
     obj: TSongPositions,
@@ -130,6 +132,7 @@ export const useGesture = (
           [newIndexItemKey]: {
             ...currentSongPositionsDerived.value[newIndexItemKey],
             updatedIndex: currentIndex.value,
+            updatedTop: currentIndex.value * SONG_HEIGHT,
           },
           [currentDragIndexItemKey]: {
             ...currentSongPositionsDerived.value[currentDragIndexItemKey],
@@ -188,7 +191,7 @@ export const useGesture = (
   );
 
   const gesture = Gesture.Pan()
-    .onTouchesDown(() => {
+    .onTouchesDown(e => {
       isDragging.value = withSpring(1);
       //keep track of dragged item
       draggedItemId.value = item.id;
@@ -199,17 +202,51 @@ export const useGesture = (
       //store dragged item id for future swap
       currentIndex.value =
         currentSongPositionsDerived.value[item.id].updatedIndex;
+
+      //as soon as user touches the item, store total distance of user's finger from top of list
+      totalY.value = scrollYDerived.value + e.allTouches[0].absoluteY;
     })
     .onUpdate(e => {
-      onGestureUpdate(scrollYDerived.value + e.absoluteY);
+      if (draggedItemIdDerived.value === null) {
+        return;
+      }
+      //calculate new total distance of user's finger from top of list.
+      const newTotalY = scrollYDerived.value + e.absoluteY;
+      //calculate difference between the prev and new total distance
+      const diff = totalY.value - newTotalY;
+      //calculate the updated top of item
+      const updatedTop =
+        currentSongPositionsDerived.value[draggedItemIdDerived.value]
+          .updatedTop;
+      //calculate new top value by negating diff of total distance from updated top
+      const newTop = updatedTop - diff;
+      onGestureUpdate(newTop);
     })
     .onTouchesUp(() => {
       isDragInProgress.value = false;
       draggedItemId.value = null;
-      //stop dragging with delay of 200ms to have nice animation consistent with scale
+
+      //stop dragging with delay of 200ms to have nice animation consistent with scale animation
       isDragging.value = withDelay(200, withSpring(0));
-      if (newIndex.value !== null) {
-        top.value = withSpring(newIndex.value * SONG_HEIGHT);
+      if (newIndex.value === null || currentIndex.value === null) {
+        return;
+      }
+      top.value = withSpring(newIndex.value * SONG_HEIGHT);
+
+      const currentDragIndexItemKey = getKeyOfValue(
+        currentIndex.value,
+        currentSongPositionsDerived.value,
+      );
+
+      if (currentDragIndexItemKey !== undefined) {
+        //update the values for item whose drag we just stopped
+        currentSongPositions.value = {
+          ...currentSongPositionsDerived.value,
+          [currentDragIndexItemKey]: {
+            ...currentSongPositionsDerived.value[currentDragIndexItemKey],
+            updatedTop: newIndex.value * SONG_HEIGHT,
+          },
+        };
       }
     });
 
