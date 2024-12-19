@@ -83,16 +83,17 @@ export const useGesture = (
     let topEdge = scrollYDerived.value;
     let bottomEdge =
       scrollYDerived.value + SCREEN_HEIGHT - EDGE_THRESHOLD * 2.5;
-    const isUpperEdge = newTop <= topEdge;
-    const isBottomEdge = newTop >= bottomEdge;
+    const isUpperEdge =
+      parseInt(newTop.toFixed(2), 10) <= parseInt(topEdge.toFixed(2), 10);
+    const isBottomEdge =
+      parseInt(newTop.toFixed(2), 10) >= parseInt(bottomEdge.toFixed(2), 10);
 
     if (
       currentIndex.value === null ||
-      newTop < MIN_BOUNDRY ||
-      newTop > MAX_BOUNDRY
+      newTop <= MIN_BOUNDRY ||
+      newTop >= MAX_BOUNDRY
     ) {
       //TODO: see why this is console printing when item dragged to bottom
-      // console.log('returning', currentIndex.value, newTop);
       return;
     }
 
