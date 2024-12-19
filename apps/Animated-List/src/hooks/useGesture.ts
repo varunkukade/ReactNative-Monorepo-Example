@@ -61,10 +61,7 @@ export const useGesture = (
   });
 
   const isCurrentDraggingItem = useDerivedValue(() => {
-    return (
-      draggedItemIdDerived.value !== null &&
-      draggedItemIdDerived.value === item.id
-    );
+    return draggedItemIdDerived.value === item.id;
   });
 
   const getKeyOfValue = (
@@ -82,8 +79,6 @@ export const useGesture = (
 
   const onGestureUpdate = (newTop: number) => {
     'worklet';
-
-    let localNewTop;
     let topEdge = scrollYDerived.value;
     let bottomEdge =
       scrollYDerived.value + SCREEN_HEIGHT - EDGE_THRESHOLD * 2.5;
@@ -95,22 +90,23 @@ export const useGesture = (
       newTop < MIN_BOUNDRY ||
       newTop > MAX_BOUNDRY
     ) {
+      //TODO: see why this is console printing when item dragged to bottom
+      // console.log('returning', currentIndex.value, newTop);
       return;
     }
 
     if (isUpperEdge) {
       top.value = topEdge;
-      localNewTop = topEdge;
     } else if (isBottomEdge) {
       top.value = bottomEdge;
-      localNewTop = bottomEdge;
     } else {
-      top.value = newTop;
-      localNewTop = newTop;
+      top.value = withTiming(newTop, {
+        duration: 8,
+      });
     }
 
     //calculate the new index where drag is headed to
-    newIndex.value = Math.floor((localNewTop + SONG_HEIGHT / 2) / SONG_HEIGHT);
+    newIndex.value = Math.floor((top.value + SONG_HEIGHT / 2) / SONG_HEIGHT);
     //swap the items present at newIndex and currentIndex
     if (newIndex.value !== currentIndex.value) {
       //find id of the item that currently resides at newIndex
@@ -159,8 +155,10 @@ export const useGesture = (
       return scrollYDerived.value;
     },
     (currentValue, previousValue) => {
-      if (!isDragInProgressDerived.value) {
-        //we don't want to trigger automatic scroll when user ends the drag
+      if (!isDragInProgressDerived.value || !isCurrentDraggingItem.value) {
+        //useAnimatedReaction executed for every item when scroll happens
+        //we don't want to trigger automatic gesture if drag is not happening
+        //also we just want to trigger automatic gesture for currently dragged item
         return;
       }
       const isScrolledUp = (previousValue || 0) > currentValue;
@@ -178,13 +176,7 @@ export const useGesture = (
     },
     (currentValue, previousValue) => {
       if (currentValue !== previousValue) {
-        if (isCurrentDraggingItem) {
-          //add separate animation for dragging item
-          top.value = withSpring(
-            currentSongPositionsDerived.value[item.id].updatedIndex *
-              SONG_HEIGHT,
-          );
-        } else {
+        if (!isCurrentDraggingItem.value) {
           top.value = withTiming(
             currentSongPositionsDerived.value[item.id].updatedIndex *
               SONG_HEIGHT,
@@ -213,6 +205,7 @@ export const useGesture = (
     })
     .onTouchesUp(() => {
       isDragInProgress.value = false;
+      draggedItemId.value = null;
       //stop dragging with delay of 200ms to have nice animation consistent with scale
       isDragging.value = withDelay(200, withSpring(0));
       if (newIndex.value !== null) {
@@ -264,7 +257,7 @@ export const useGesture = (
         : 0, // For Android,
       zIndex: isCurrentDraggingItem.value ? 1 : 0,
     };
-  }, [isCurrentDraggingItem.value, isDraggingDerived.value]);
+  }, [top.value, isCurrentDraggingItem.value, isDraggingDerived.value]);
 
   return {
     animatedStyles,
