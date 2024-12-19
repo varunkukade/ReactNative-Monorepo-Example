@@ -196,10 +196,8 @@ export const useGesture = (
   );
 
   const gesture = Gesture.Pan()
-    .onStart(() => {
-      //start dragging
+    .onTouchesDown(() => {
       isDragging.value = withSpring(1);
-
       //keep track of dragged item
       draggedItemId.value = item.id;
 
@@ -213,14 +211,13 @@ export const useGesture = (
     .onUpdate(e => {
       onGestureUpdate(scrollYDerived.value + e.absoluteY);
     })
-    .onEnd(() => {
+    .onTouchesUp(() => {
       isDragInProgress.value = false;
-      if (newIndex.value === null) {
-        return;
-      }
-      top.value = withSpring(newIndex.value * SONG_HEIGHT);
       //stop dragging with delay of 200ms to have nice animation consistent with scale
       isDragging.value = withDelay(200, withSpring(0));
+      if (newIndex.value !== null) {
+        top.value = withSpring(newIndex.value * SONG_HEIGHT);
+      }
     });
 
   const animatedStyles = useAnimatedStyle(() => {
