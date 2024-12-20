@@ -20,6 +20,7 @@ import {
 } from '../constants';
 import {NullableNumber, TSongPositions, TItem} from '../types';
 import {Gesture} from 'react-native-gesture-handler';
+import {estimatedItemHeight} from '../screens/AnimatedList';
 
 export const useGesture = (
   item: TItem,
@@ -30,6 +31,7 @@ export const useGesture = (
   scrollDown: () => void,
   scrollY: SharedValue<number>,
   isDragInProgress: SharedValue<boolean>,
+  calculateHeightForIndexesBelow: (targetIndex: number) => number,
 ) => {
   //used for swapping with currentIndex
   const newIndex = useSharedValue<NullableNumber>(null);
@@ -41,7 +43,7 @@ export const useGesture = (
     return currentSongPositions.value;
   });
 
-  const top = useSharedValue(item.id * SONG_HEIGHT);
+  const top = useSharedValue(item.id * estimatedItemHeight);
 
   const isDraggingDerived = useDerivedValue(() => {
     return isDragging.value;
@@ -182,7 +184,7 @@ export const useGesture = (
         if (!isCurrentDraggingItem.value) {
           top.value = withTiming(
             currentSongPositionsDerived.value[item.id].updatedIndex *
-              SONG_HEIGHT,
+              estimatedItemHeight,
             {duration: 500},
           );
         }

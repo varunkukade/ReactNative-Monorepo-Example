@@ -1,3 +1,4 @@
+import {LayoutChangeEvent} from 'react-native';
 import {SharedValue} from 'react-native-reanimated';
 
 export type TItem = {
@@ -5,6 +6,7 @@ export type TItem = {
   title: string;
   singer: string;
   imageSrc: string;
+  extraDesc?: string;
 };
 
 export type TListItem = {
@@ -16,12 +18,15 @@ export type TListItem = {
   scrollDown: () => void;
   scrollY: SharedValue<number>;
   isDragInProgress: SharedValue<boolean>;
+  handleLayout: (id: number, event: LayoutChangeEvent) => void;
+  calculateHeightForIndexesBelow: (targetIndex: number) => number;
 };
 
 export type TSongPositions = {
   [key: number]: {
     updatedIndex: number;
     updatedTop: number;
+    // songHeight: number;
   };
 };
 

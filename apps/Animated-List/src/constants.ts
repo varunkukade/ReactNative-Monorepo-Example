@@ -9,6 +9,8 @@ export const SONGS = [
     singer: 'Coldplay',
     imageSrc:
       'https://i.scdn.co/image/ab67616d0000b2738ff7c3580d429c8212b9a3b6',
+    extraDesc: '1.6M monthly listeners',
+    approxSongHeight: 100,
   },
   {
     id: 1,
@@ -16,12 +18,16 @@ export const SONGS = [
     singer: 'Coldplay',
     imageSrc:
       'https://i.scdn.co/image/ab67616d0000b273de0cd11d7b31c3bd1fd5983d',
+    extraDesc: '7.6M monthly listeners',
+    approxSongHeight: 100,
   },
   {
     id: 2,
     title: 'Viva La Vida',
     singer: 'Coldplay',
     imageSrc: 'https://i.ytimg.com/vi/dvgZkm1xWPE/maxresdefault.jpg',
+    extraDesc: '20M monthly listeners',
+    approxSongHeight: 100,
   },
   {
     id: 3,
@@ -29,6 +35,7 @@ export const SONGS = [
     singer: 'Coldplay',
     imageSrc:
       'https://i.scdn.co/image/ab67616d0000b273e5a95573f1b91234630fd2cf',
+    approxSongHeight: 75,
   },
   {
     id: 4,
@@ -36,6 +43,7 @@ export const SONGS = [
     singer: 'Coldplay',
     imageSrc:
       'https://i.scdn.co/image/ab67616d0000b273de09e02aa7febf30b7c02d82',
+    approxSongHeight: 75,
   },
   {
     id: 5,
@@ -43,6 +51,7 @@ export const SONGS = [
     singer: 'Coldplay',
     imageSrc:
       'https://i.scdn.co/image/ab67616d0000b273de09e02aa7febf30b7c02d82',
+    approxSongHeight: 75,
   },
   {
     id: 6,
@@ -50,6 +59,8 @@ export const SONGS = [
     singer: 'ZAYN, Sia',
     imageSrc:
       'https://i.scdn.co/image/ab67616d0000b27323852b7ef0ecfe29d38d97ee',
+    extraDesc: '0.6M monthly listeners',
+    approxSongHeight: 100,
   },
   {
     id: 7,
@@ -57,6 +68,7 @@ export const SONGS = [
     singer: 'David Guetta, Sia',
     imageSrc:
       'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnwB_jMjMFnQkQOPvENr-diiJfDWFripRHBMSdeaHZyA&s',
+    approxSongHeight: 75,
   },
   {
     id: 8,
@@ -64,6 +76,7 @@ export const SONGS = [
     singer: 'Sia',
     imageSrc:
       'https://i.scdn.co/image/ab67616d0000b273297b2c53224bd19162f526e3',
+    approxSongHeight: 75,
   },
   {
     id: 9,
@@ -71,6 +84,7 @@ export const SONGS = [
     singer: 'Sia',
     imageSrc:
       'https://i.scdn.co/image/ab67616d0000b273754b2fddebe7039fdb912837',
+    approxSongHeight: 75,
   },
   {
     id: 10,
@@ -78,6 +92,7 @@ export const SONGS = [
     singer: 'Sia, Sean Paul',
     imageSrc:
       'https://i.scdn.co/image/ab67616d0000b2731e6901561bb0cd5697cbfded',
+    approxSongHeight: 75,
   },
   {
     id: 11,
@@ -85,6 +100,7 @@ export const SONGS = [
     singer: 'Sia',
     imageSrc:
       'https://i.scdn.co/image/ab67616d0000b2735d199c9f6e6562aafa5aa357',
+    approxSongHeight: 75,
   },
   {
     id: 12,
@@ -92,6 +108,7 @@ export const SONGS = [
     singer: 'Imagine Dragons',
     imageSrc:
       'https://i.scdn.co/image/ab67616d0000b273156aeddf54ed40b1d9d30c9f',
+    approxSongHeight: 75,
   },
   {
     id: 13,
@@ -99,6 +116,8 @@ export const SONGS = [
     singer: 'DJ Snake, Justin Bieber',
     imageSrc:
       'https://i.scdn.co/image/ab67616d0000b273212d776c31027c511f0ee3bc',
+    extraDesc: '4.5M monthly listeners',
+    approxSongHeight: 100,
   },
   {
     id: 14,
@@ -106,6 +125,7 @@ export const SONGS = [
     singer: 'Major Lazer',
     imageSrc:
       'https://i.scdn.co/image/ab67616d0000b273548910835dbfaf3f79a1dc46',
+    approxSongHeight: 75,
   },
   {
     id: 15,
@@ -113,6 +133,8 @@ export const SONGS = [
     singer: 'DJ Snake',
     imageSrc:
       'https://i.scdn.co/image/ab67616d0000b273e105c410a7b390c61a58cbf8',
+    extraDesc: '14M monthly listeners',
+    approxSongHeight: 100,
   },
 ];
 
@@ -122,6 +144,7 @@ export const getInitialPositions = (): TSongPositions => {
     songPositions[i] = {
       updatedIndex: i,
       updatedTop: i * SONG_HEIGHT,
+      // songHeight: 0,
     };
   }
   return songPositions;
